@@ -1,34 +1,49 @@
 @extends('main')
-@section('title', 'Pembelian')
-@section('breadcrumb', 'Pembelian')
-@section('page-title', 'Pembelian')
+@section('title', 'Penjualan')
+@section('breadcrumb', 'Penjualan')
+@section('page-title', 'Penjualan')
 
 @section('content')
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <button class="btn btn-primary"><a href="{{ route('formatexcel') }}" class="text-white">Export Pembelian
-                        (.xlsx)</a></button>
-            </div>
-            @if (Auth::user()->role == 'kasir')
-                <div>
-                    <a class="btn btn-success" href="{{ route('pembelians.create') }}">Tambah Pembelian</a>
-                </div>
-            @endif
-        </div>
+       <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
+        <form method="GET" action="{{ route('penjualan.index') }}">
+            <select name="filter" class="form-select" onchange="this.form.submit()">
+                <option value="">-- Filter Waktu --</option>
+                <option value="today" {{ request('filter') == 'today' ? 'selected' : '' }}>Hari Ini</option>
+                <option value="this_week" {{ request('filter') == 'this_week' ? 'selected' : '' }}>Minggu Ini</option>
+                <option value="this_month" {{ request('filter') == 'this_month' ? 'selected' : '' }}>Bulan Ini</option>
+                <option value="this_year" {{ request('filter') == 'this_year' ? 'selected' : '' }}>Tahun Ini</option>
+            </select>
+        </form>
+
+        <a href="{{ route('formatexcel') . '?' . http_build_query(request()->only('filter')) }}" class="btn btn-primary">
+            Export Penjualan (.xlsx)
+        </a>
+
+    </div>
+
+    @if (Auth::user()->role == 'kasir')
+        <a class="btn btn-success" href="{{ route('penjualan.create') }}">Tambah Penjualan</a>
+    @endif
+</div>
+
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="dropdown me-2">
                 Tampilkan
                 <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown"
                     aria-expanded="false">
-                    10
+                    {{ request('entries', 10) }}
                 </button>
                 Entri
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">10</a></li>
-                    <li><a class="dropdown-item" href="#">15</a></li>
-                    <li><a class="dropdown-item" href="#">20</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 10]) }}">10</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 15]) }}">15</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 20]) }}">20</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 25]) }}">25</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 50]) }}">50</a></li>
+                    <li><a class="dropdown-item" href="{{ request()->fullUrlWithQuery(['entries' => 100]) }}">100</a></li>
                 </ul>
             </div>
             <div>
@@ -44,7 +59,7 @@
                 <tr>
                     <th scope="col" class="text-center">No</th>
                     <th scope="col" class="text-center">Nama Pelanggan</th>
-                    <th scope="col" class="text-center">Tanggal Pembelian</th>
+                    <th scope="col" class="text-center">Tanggal Penjualan</th>
                     <th scope="col" class="text-center">Total Harga</th>
                     <th scope="col" class="text-center">Dibuat Oleh</th>
                     <th scope="col" class="text-center">Aksi</th>
@@ -76,21 +91,17 @@
 
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                Menampilkan 1 hingga 10 dari 100 entri
+                Menampilkan {{ $transaction->firstItem() }} hingga {{ $transaction->lastItem() }} dari {{ $transaction->total() }} entri
             </div>
             <div>
                 <nav aria-label="Page navigation example">
-                    <ul class="pagination">
-                        <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
-                    </ul>
+                    {{ $transaction->links('pagination::bootstrap-4') }}
                 </nav>
             </div>
         </div>
     </div>
+
+
 
     @foreach ($transaction as $item)
         <!-- Modal Detail Penjualan -->
@@ -99,7 +110,7 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="modalDetailLabel{{ $item->id }}">Detail Pembelian</h5>
+                        <h5 class="modal-title" id="modalDetailLabel{{ $item->id }}">Detail Penjualan</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                     </div>
                     <div class="modal-body">

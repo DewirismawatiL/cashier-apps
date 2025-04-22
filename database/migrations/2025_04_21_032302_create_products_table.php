@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100)->nullable();
-            $table->decimal('price', 15, 2); // Perbaiki sintaksis decimal
+            $table->decimal('price', 15); // Perbaiki sintaksis decimal
             $table->string('image');
             $table->unsignedInteger('stock')->nullable(); // Gunakan unsignedInteger
             $table->timestamps();

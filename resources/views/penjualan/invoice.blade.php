@@ -25,17 +25,26 @@
         }
 
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        table-layout: fixed; /* ini penting */
+}
 
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
+
+        td, th {
+        border: 1px solid #ddd;
+        padding: 8px; /* dikurangi dari 13px */
+        text-align: left;
+        word-break: break-word; /* supaya teks panjang tidak keluar kolom */
+        white-space: normal;
+        font-size: 10px; /* bisa diturunkan kalau masih kepanjangan */
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
 
         th {
             background-color: #f4f4f4;
@@ -60,7 +69,7 @@
 
 <body>
     <h1>Invoice - #2</h1>
-    @if ($member !== null)        
+    @if ($member !== null)
     <p>Member Name : {{ $member->name }}</p>
     <p>No. HP : {{ $member->phone_number }}</p>
     <p>Bergabung Sejak : {{ $member->created_at }}</p>
@@ -73,39 +82,32 @@
                 <th>Harga</th>
                 <th>Jumlah</th>
                 <th>Sub total</th>
+                <th>Tunai</th>
+                <th>Kembalian</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($details as $item)
             <tr>
                 <td>{{ $item->product->name }}</td>
-                <td>Rp.{{ number_format($item->product->price, 2, '.', '.') }}</td>
+                <td class="nowrap">Rp.{{ number_format($item->product->price, 0, '.', '.') }}</td>
                 <td>{{ $item->qty }}</td>
-                <td>Rp.{{ number_format($transaction->total_price, 2, '.', '.') }}</td>
+                <td class="nowrap">Rp.{{ number_format($item->qty * $item->product->price, 0, '.', '.') }}</td>
+                <td>Rp.{{ number_format($cash, 0, '.', '.') }}</td>
+                <td class="nowrap">Rp.{{ number_format($kembalian, 0, '.', '.') }}</td>
+                <td class="nowrap">Rp.{{ number_format($transaction->total_price, 0, '.', '.') }}</td>
+
             </tr>
             @endforeach
-        </tbody>
-        <tfoot>
             @if ($member)
             <tr>
-                <th colspan="3">Poin Member</th>
+                <td colspan="3"><strong>Poin Member</strong></td>
                 <td>{{ $member->poin_member }}</td>
             </tr>
             @endif
-            <tr>
-                <th colspan="3">Tunai</th>
-                <td>Rp.{{ number_format($cash, 2, '.', '.') }}</td>
-            </tr>
-            <tr>
-                <th colspan="3">Kembalian</th>
-                <td>Rp.{{ number_format($kembalian, 2, '.', '.') }}</td>
-            </tr>
-            <tr>
-                <th colspan="3">Total</th>
-                <td>Rp.{{ number_format($transaction->total_price, 2, '.', '.') }}</td>
-            </tr>
-        </tfoot>
-        
+
+        </tbody>
     </table>
     <div class="notes">
         Terima kasih atas pembelian Anda.

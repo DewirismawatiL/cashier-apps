@@ -15,7 +15,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/storeCart', [PenjualanController::class, 'cart'])->name('store.cart');
     Route::get('/transaction/{id}/pdf', [PenjualanController::class, 'CetakPdf'])->name('formatpdf');
     Route::patch('/orderMember', [PenjualanController::class, 'checkMember'])->name('orderMember');
-    Route::resource('pembelians', PenjualanController::class);
+    Route::resource('penjualan', PenjualanController::class);
     Route::resource('users', UserController::class);
     Route::get('/export-excel', function () {
         return Excel::download(new SellingExport, 'DokumenExcel.xlsx');
@@ -29,6 +29,8 @@ Route::middleware('guest')->group(function () {
     })->name('login');
     Route::post('/login', [UserController::class, 'authLogin'])->name('authLogin');
 });
+
+
 
 // Route::get('fileUpload' , [
 //     'as' => 'products.store',

@@ -30,39 +30,39 @@ class ProductController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'price' => 'required|numeric|min:0',
-        'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'stock' => 'required|numeric|min:0'
-    ]);
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0|max:1000000000', // Batas maksimum 1.000.000
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stock' => 'required|numeric|min:0'
+        ]);
 
-    // Simpan gambar ke storage public/products
-    $image = $request->file('image');
-    $imageName = time() . '_' . $image->getClientOriginalName();
-    $image->move(public_path('image'), $imageName);
-
-
-    Products::create([
-        'name' => $validated['name'],
-        'price' => (int) str_replace(['.', ','], '', $validated['price']),
-        'image' => $imageName,
-        'stock' => $validated['stock'],
-    ]);
+        // Simpan gambar ke storage public/products
+        $image = $request->file('image');
+        $imageName = time() . '_' . $image->getClientOriginalName();
+        $image->move(public_path('image'), $imageName);
 
 
-    return redirect()->route('products.index')->with('success', 'Berhasil menambahkan data');
-}
+        Products::create([
+            'name' => $validated['name'],
+            'price' => $validated['price'], // Pastikan validasi sudah dilakukan
+            'image' => $imageName,
+            'stock' => $validated['stock'],
+        ]);
 
-// public function fileUpload(Request $request)
-// {
-//     $image = $request->file('image');
-//     $input ['imagename'] = time().'.'. $image->getClientOriginalExtension();
-//     $destinatioanPath = public_path('/images');
-//     $image->move($destinatioanPath, $inp)
 
-// }
+        return redirect()->route('products.index')->with('success', 'Berhasil menambahkan data');
+    }
+
+    // public function fileUpload(Request $request)
+    // {
+    //     $image = $request->file('image');
+    //     $input ['imagename'] = time().'.'. $image->getClientOriginalExtension();
+    //     $destinatioanPath = public_path('/images');
+    //     $image->move($destinatioanPath, $inp)
+
+    // }
 
     /**
      * Display the specified resource.
@@ -80,21 +80,17 @@ class ProductController extends Controller
         $product = Products::find($id);
 
         return view('product.edit', compact('product'));
-
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $product = Products::findOrFail($id);
 
+        // Validasi input
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'stock' => 'required|integer|min:' . $product->stock,
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'price' => 'required|numeric|min:0|max:1000000000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'stock' => 'required|numeric|min:0'
         ]);
 
         // Bersihkan harga dari titik/koma
@@ -116,13 +112,13 @@ class ProductController extends Controller
             unset($validated['image']);
         }
 
+        // Update data produk
         $product->update($validated);
 
         return redirect()->back()->with('success', 'Data berhasil diubah');
     }
-
-
-    public function updateStock (Request $request, string $id) {
+    public function updateStock(Request $request, string $id)
+    {
         $request->validate([
             'stock' => 'required|integer|min:0'
         ]);
@@ -133,14 +129,9 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Berhasil update stock');
     }
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        Products::where('id',$id)->delete();
+        Products::where('id', $id)->delete();
 
         return redirect()->back()->with('success', 'Berhasil menghapus data');
     }

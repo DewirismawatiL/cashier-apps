@@ -72,7 +72,7 @@
             <h3 class="fw-bold">Selamat Datang, Petugas Kasir!</h3>
             <p class="text-muted">Berikut adalah ringkasan penjualan hari ini</p>
         </div>
-    
+
         <div class="row justify-content-center">
             <!-- Total Penjualan Hari Ini -->
             <div class="col-md-4 mb-4">
@@ -83,7 +83,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <!-- Transaksi Member -->
             <div class="col-md-4 mb-4">
                 <div class="card text-white bg-primary shadow">
@@ -93,7 +93,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <!-- Transaksi Non-Member -->
             <div class="col-md-4 mb-4">
                 <div class="card text-white bg-warning shadow">
@@ -104,7 +104,7 @@
                 </div>
             </div>
         </div>
-    
+
         <!-- Terakhir Diperbarui -->
         <div class="row justify-content-center">
             <div class="col-md-6">
@@ -123,5 +123,5 @@
         </div>
     </div>
     @endif
-    
+
 @endsection

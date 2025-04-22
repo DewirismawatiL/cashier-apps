@@ -9,20 +9,59 @@ use App\Models\Selling;
 use App\Models\Products;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SellingExport;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class PenjualanController extends Controller
 {
-    public function index()
-    {
-        $transaction = Selling::with('user', 'member', 'details.product')->get();
-        return view('pembelian.index', compact('transaction'));
-    }
+    public function index(Request $request)
+{
+    $entries = $request->input('entries', 10);
+    $search = $request->input('search');
+    $filter = $request->input('filter'); // filter waktu: today, this_week, etc.
 
+    $transaction = Selling::with('user', 'member', 'details.product')
+        ->when($search, function ($query, $search) {
+            return $query->where(function ($q) use ($search) {
+                $q->whereHas('member', function ($q2) use ($search) {
+                    $q2->where('name', 'like', "%{$search}%")
+                       ->orWhere('phone_number', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%");
+            });
+        })
+        ->when($filter, function ($query, $filter) {
+            switch ($filter) {
+                case 'today':
+                    return $query->whereDate('created_at', Carbon::today());
+                case 'this_week':
+                    return $query->whereBetween('created_at', [
+                        Carbon::now()->startOfWeek(),
+                        Carbon::now()->endOfWeek()
+                    ]);
+                case 'this_month':
+                    return $query->whereMonth('created_at', Carbon::now()->month)
+                                 ->whereYear('created_at', Carbon::now()->year);
+                case 'this_year':
+                    return $query->whereYear('created_at', Carbon::now()->year);
+            }
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate($entries);
+
+        return view('penjualan.index', compact('transaction', 'entries', 'search', 'filter'));
+}
+
+
+public function exportExcel(Request $request)
+{
+    return Excel::download(new SellingExport(), 'laporan-penjualan.xlsx');
+}
     public function create()
     {
         $products = Products::all();
-        return view('pembelian.tambah', compact('products'));
+        return view('penjualan.tambah', compact('products'));
     }
 
     public function store(Request $request)
@@ -80,14 +119,14 @@ class PenjualanController extends Controller
                 $checkpoin = Selling::where('member_id', $member->id)->count();
             }
 
-            return view('pembelian.checkMember', [
-                'dataTransaction' => $sellingData,
-                'member' => $member,
-                'totalBayar' => $request->total_bayar,
-                'subtotal' => $totalPrice,
-                'poinmember' => $member->poin_member,
-                'checkPoint' => $checkpoin
-            ]);
+           return view('penjualan.checkMember', [
+    'dataTransaction' => $sellingData,
+    'member' => $member,
+    'totalBayar' => $request->total_bayar,
+    'subtotal' => $totalPrice,
+    'poinmember' => $member->poin_member,
+    'checkPoint' => $checkpoin
+]);
         }
 
         // Non-member process
@@ -211,7 +250,7 @@ class PenjualanController extends Controller
         $invoiceNumber = Selling::orderBy('created_at', 'desc')->count() + 1;
         $userName = $user->name;
 
-        return view('pembelian.result', [
+        return view('penjualan.result', [
             'sellingData' => $sellingData,
             'totalPrice' => $totalPrice,
             'userName' => $userName,

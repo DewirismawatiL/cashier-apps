@@ -32,7 +32,7 @@
             <tr>
                 <th scope="row" class="text-center">{{ $id++ }}</th>
                 <td class="text-center  w-25">
-                    <img src="{{ asset('image/'. $product->image) }}" alt="{{ $product->image }}" class="img-fluid w-50">                </td>
+                    <img src="{{ asset('image/'. $product->image) }}" alt="{{ $product->image }}" class="img-fluid w-50"></td>
                 <td class="text-center">{{ $product->name }}</td>
                 <td class="text-center">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
                 <td class="text-center">{{ $product->stock }}</td>
